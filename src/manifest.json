@@ -1,0 +1,41 @@
+{
+  "name": "StoryApp",
+  "short_name": "StoryApp",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "any",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tambah Story",
+      "short_name": "Post",
+      "url": "#/add-story",
+      "description": "Buat story baru"
+    },
+    {
+      "name": "Lihat Peta",
+      "short_name": "Map",
+      "url": "#/map",
+      "description": "Buka peta story"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/sample-screenshot.png",
+      "sizes": "540x720",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Story App</title>
+
+    <!-- Tambahan dari versi baru -->
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="manifest" href="/manifest.json" />
+    <!-- --------------- -->
+
+    <link rel="icon" href="/favicon.png" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
+
+    <script type="module" src="/scripts/index.js" defer></script>
+  </head>
+
+  <body>
+    <a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+    <header>
+      <div class="main-header container" role="banner">
+        <a class="brand-name" href="#/" aria-label="Halaman utama Story App">StoryApp</a>
+
+        <nav
+          id="navigation-drawer"
+          class="navigation-drawer"
+          aria-label="Navigasi utama"
+          role="navigation"
+        >
+          <ul id="nav-list" class="nav-list">
+            <li><a href="#/">Home</a></li>
+            <li><a href="#/about">About</a></li>
+            <li><a href="#/map">Map</a></li>
+            <li><a href="#/add-story">Post Story</a></li>
+            <li><a href="#/login" id="login-link">Login</a></li>
+          </ul>
+
+          <!-- === Push Notification Label === -->
+          <div class="push-notification-label">
+            <span>
+              <i class="fa-solid fa-bell"></i>
+              Notifikasi
+            </span>
+            <input type="checkbox" class="push-toggle" id="pushToggle" aria-label="Aktifkan notifikasi" />
+          </div>
+          <!-- =============================== -->
+        </nav>
+
+        <button id="drawer-button" class="drawer-button" aria-label="Buka menu navigasi">☰</button>
+      </div>
+    </header>
+
+    <main id="main-content" class="main-content" role="main">
+      <section id="app" aria-label="Konten Utama"></section>
+    </main>
+
+    <footer role="contentinfo" class="footer container">
+      <p>&copy; 2025 StoryApp. Dibuat oleh <strong>Raka Satria Efendi</strong>.</p>
+      <p>
+        <a href="#/about" aria-label="Tentang Aplikasi">Tentang</a> |
+        <a href="https://www.dicoding.com" target="_blank" rel="noopener" aria-label="Kunjungi Dicoding">Dicoding</a>
+      </p>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const loginLink = document.getElementById("login-link");
+        if (loginLink) {
+          const token = localStorage.getItem("token");
+          if (token) {
+            loginLink.textContent = "Logout";
+            loginLink.addEventListener("click", (e) => {
+              e.preventDefault();
+              localStorage.removeItem("token");
+              window.location.reload();
+            });
+          } else {
+            loginLink.textContent = "Login";
+            loginLink.addEventListener("click", (e) => {
+              e.preventDefault();
+              window.location.hash = "#/login";
+            });
+          }
+        }
+
+        // Simulasi status toggle push
+        const pushToggle = document.getElementById("pushToggle");
+        pushToggle.addEventListener("change", (e) => {
+          if (e.target.checked) {
+            Swal.fire({
+              icon: "success",
+              title: "Notifikasi diaktifkan 🎉",
+              text: "Kamu akan menerima pembaruan terbaru.",
+              timer: 2500,
+              showConfirmButton: false,
+            });
+          } else {
+            Swal.fire({
+              icon: "info",
+              title: "Notifikasi dimatikan",
+              text: "Kamu tidak akan menerima notifikasi.",
+              timer: 2000,
+              showConfirmButton: false,
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
