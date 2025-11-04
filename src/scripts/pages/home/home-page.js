@@ -2,7 +2,7 @@
 
 import L from 'leaflet';
 import { getStories } from '../../data/api.js';
-import { getAllStories } from '../../utils/idb.js'; 
+import { getAllStories, saveStories, deleteStory } from '../../utils/idb.js';
 
 export default class HomePage {
   async render() {
@@ -12,16 +12,22 @@ export default class HomePage {
         <p id="offline-indicator" style="display:none; color:red;">⚠️ Anda sedang offline</p>
         <p>Selamat datang di aplikasi SPA! Gunakan menu navigasi di atas untuk berpindah halaman.</p>
 
-        <div class="controls">
-          <label for="filter-location">
-            <input type="checkbox" id="filter-location" />
-            Tampilkan hanya stories dengan lokasi
-          </label>
+          <div class="controls">
+            <label for="filter-location">
+              <input type="checkbox" id="filter-location" />
+              Tampilkan hanya stories dengan lokasi
+            </label>
 
-          <!-- Tambahan: Search dan Sort -->
-          <input type="text" id="search-input" placeholder="Cari story..." style="margin-left: 10px;" />
-          <button id="sort-button" data-order="desc">Urutkan: Terbaru ↓</button>
-        </div>
+            <!-- Tambahan: Search dan Sort -->
+            <input type="text" id="search-input" placeholder="Cari story..." style="margin-left: 10px;" />
+            <button id="sort-button" data-order="desc">Urutkan: Terbaru ↓</button>
+
+            <!-- IndexedDB Management -->
+            <div class="idb-controls" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button id="view-cached-stories" style="padding: 8px 12px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">Lihat Stories Tersimpan (IndexedDB)</button>
+              <button id="clear-cached-stories" style="padding: 8px 12px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">Hapus Semua Stories Tersimpan</button>
+            </div>
+          </div>
 
         <div class="story-section">
           <div id="map" class="map" role="application" aria-label="Peta lokasi story"></div>
@@ -41,6 +47,8 @@ export default class HomePage {
     // tambahan elemen baru
     const searchInput = document.getElementById('search-input');
     const sortButton = document.getElementById('sort-button');
+    const viewCachedBtn = document.getElementById('view-cached-stories');
+    const clearCachedBtn = document.getElementById('clear-cached-stories');
 
     // indikator offline
     if (!navigator.onLine) offlineIndicator.style.display = 'block';
@@ -173,6 +181,82 @@ export default class HomePage {
       }
 
       renderMapAndList(allStories);
+    });
+
+    // IndexedDB: View cached stories
+    viewCachedBtn.addEventListener('click', async () => {
+      const cachedStories = await getAllStories();
+      if (cachedStories.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Tidak ada stories tersimpan',
+          text: 'Belum ada stories yang disimpan di IndexedDB.',
+        });
+        return;
+      }
+
+      // Render cached stories with delete buttons
+      const cachedHtml = cachedStories.map((story) => `
+        <article class="story-item" data-id="${story.id}">
+          <img src="${story.photoUrl}" alt="${story.name}" loading="lazy" />
+          <h3>${story.name}</h3>
+          <p>${story.description}</p>
+          <small class="story-date">📅 ${new Date(story.createdAt).toLocaleString('id-ID')}</small>
+          <button class="delete-story-btn" data-id="${story.id}" style="margin-top: 10px; background: #dc2626; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Hapus</button>
+        </article>
+      `).join('');
+
+      Swal.fire({
+        title: 'Stories Tersimpan di IndexedDB',
+        html: `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; max-height: 400px; overflow-y: auto;">${cachedHtml}</div>`,
+        showConfirmButton: false,
+        showCloseButton: true,
+        width: '90%',
+        didOpen: () => {
+          // Add delete event listeners
+          document.querySelectorAll('.delete-story-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+              const storyId = e.target.dataset.id;
+              await deleteStory(storyId);
+              Swal.fire({
+                icon: 'success',
+                title: 'Story dihapus',
+                text: 'Story telah dihapus dari IndexedDB.',
+                timer: 1500,
+              });
+              // Refresh the modal content
+              e.target.closest('.story-item').remove();
+            });
+          });
+        }
+      });
+    });
+
+    // IndexedDB: Clear all cached stories
+    clearCachedBtn.addEventListener('click', async () => {
+      const result = await Swal.fire({
+        title: 'Hapus semua stories tersimpan?',
+        text: 'Tindakan ini tidak dapat dibatalkan.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal'
+      });
+
+      if (result.isConfirmed) {
+        const cachedStories = await getAllStories();
+        for (const story of cachedStories) {
+          await deleteStory(story.id);
+        }
+        Swal.fire({
+          icon: 'success',
+          title: 'Semua stories dihapus',
+          text: 'Semua stories tersimpan telah dihapus dari IndexedDB.',
+          timer: 2000,
+        });
+      }
     });
 
     setTimeout(() => map.invalidateSize(), 500);

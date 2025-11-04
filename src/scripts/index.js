@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       syncOutbox();
 
       // Push subscription toggle
-      const pushToggle = document.getElementById('push-toggle');
+      const pushToggle = document.getElementById('pushToggle');
       if (pushToggle) {
         const registration = await navigator.serviceWorker.ready;
         const existingSub = await registration.pushManager.getSubscription();
@@ -84,12 +84,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         pushToggle.addEventListener('change', async (e) => {
           if (e.target.checked) {
             // subscribe
-            const key = await getVapidPublicKey();
-            if (!key) {
-              // notify user to set VAPID key or backend doesn't provide it
-              alert('VAPID public key tidak tersedia dari server. Subscribe mungkin gagal.');
-            }
-            const applicationServerKey = key ? urlBase64ToUint8Array(key) : undefined;
+            const key = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk';
+            const applicationServerKey = urlBase64ToUint8Array(key);
             try {
               const sub = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
@@ -99,17 +95,40 @@ document.addEventListener('DOMContentLoaded', async () => {
               localStorage.setItem('push-subscription', JSON.stringify(sub));
               pushToggle.checked = true;
               console.log('Push subscribed');
+              Swal.fire({
+                icon: "success",
+                title: "Notifikasi diaktifkan 🎉",
+                text: "Kamu akan menerima pembaruan terbaru.",
+                timer: 2500,
+                showConfirmButton: false,
+              });
             } catch (err) {
               console.error('Failed to subscribe', err);
               pushToggle.checked = false;
+              Swal.fire({
+                icon: "error",
+                title: "Gagal mengaktifkan notifikasi",
+                text: err.message,
+                confirmButtonColor: "#dc2626",
+              });
             }
           } else {
             // unsubscribe
             try {
               const sub = await registration.pushManager.getSubscription();
-              if (sub) await sub.unsubscribe();
+              if (sub) {
+                await sub.unsubscribe();
+                await unsubscribeFromServer(sub.endpoint);
+              }
               localStorage.removeItem('push-subscription');
               console.log('Push unsubscribed');
+              Swal.fire({
+                icon: "info",
+                title: "Notifikasi dimatikan",
+                text: "Kamu tidak akan menerima notifikasi.",
+                timer: 2000,
+                showConfirmButton: false,
+              });
             } catch (err) {
               console.warn('Unsubscribe failed', err);
             }
