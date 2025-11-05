@@ -7,12 +7,12 @@
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "/favicon.png",
+      "src": "./favicon.png",
       "sizes": "any",
       "type": "image/png"
     },
     {
-      "src": "/images/logo.png",
+      "src": "./images/logo.png",
       "sizes": "any",
       "type": "image/png"
     }
@@ -39,7 +39,7 @@
   ],
   "screenshots": [
     {
-      "src": "/images/sample-screenshot.png",
+      "src": "./images/sample-screenshot.png",
       "sizes": "540x720",
       "type": "image/png"
     }
