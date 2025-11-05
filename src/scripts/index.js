@@ -48,6 +48,39 @@ document.addEventListener('DOMContentLoaded', async () => {
       const reg = await navigator.serviceWorker.register('/service-worker.js');
       console.log('Service Worker registered', reg);
 
+      // Setup PWA install prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('beforeinstallprompt event fired');
+        e.preventDefault();
+        deferredPrompt = e;
+        // Show install button or banner after a delay
+        setTimeout(() => showInstallPrompt(), 3000);
+      });
+
+      const showInstallPrompt = () => {
+        if (deferredPrompt) {
+          Swal.fire({
+            title: 'Install StoryApp',
+            text: 'Install aplikasi ini untuk pengalaman yang lebih baik!',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Install',
+            cancelButtonText: 'Nanti'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              deferredPrompt.prompt();
+              deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                  console.log('User accepted the install prompt');
+                }
+                deferredPrompt = null;
+              });
+            }
+          });
+        }
+      };
+
       // Sync outbox when back online
       const syncOutbox = async () => {
         if (!navigator.onLine) return;

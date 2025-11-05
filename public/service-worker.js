@@ -2,11 +2,8 @@ const CACHE_NAME = 'storyapp-shell-v1';
 const RUNTIME_CACHE = 'storyapp-runtime-v1';
 
 const PRECACHE_URLS = [
-  '/',
   '/index.html',
-  '/styles.css',
   '/favicon.png',
-  '/scripts/index.js',
   '/manifest.json',
 ];
 
