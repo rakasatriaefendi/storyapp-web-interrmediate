@@ -2,7 +2,7 @@
 
 import L from 'leaflet';
 import { getStories } from '../../data/api.js';
-import { getAllStories, saveStories, deleteStory } from '../../utils/idb.js';
+import { getAllStories, saveStories, deleteStory, saveFavorite } from '../../utils/idb.js';
 
 export default class HomePage {
   async render() {
@@ -159,7 +159,7 @@ export default class HomePage {
           };
 
           try {
-            await saveStories([storyData]);
+            await saveFavorite(storyData);
             Swal.fire({
               icon: 'success',
               title: 'Story disimpan!',
@@ -171,7 +171,7 @@ export default class HomePage {
             btn.disabled = true;
             btn.style.background = '#10b981';
           } catch (err) {
-            console.error('Save story error', err);
+            console.error('Save favorite error', err);
             Swal.fire({
               icon: 'error',
               title: 'Gagal menyimpan',

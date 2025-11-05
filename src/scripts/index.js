@@ -1,7 +1,7 @@
 // scripts/index.js
 import '../styles/styles.css';
 import App from './pages/app';
-import { getVapidPublicKey, sendSubscriptionToServer, addStoryFromOutbox } from './data/api.js';
+import { getVapidPublicKey, sendSubscriptionToServer, unsubscribeFromServer, addStoryFromOutbox } from './data/api.js';
 import { saveOutbox,getOutbox, deleteOutbox } from './utils/idb.js';
 
 document.addEventListener('DOMContentLoaded', async () => {

@@ -1,8 +1,9 @@
 // Minimal IndexedDB wrapper for stories and outbox queue
 const DB_NAME = 'storyapp-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Increment version to add new store
 const STORE_STORIES = 'stories';
 const STORE_OUTBOX = 'outbox';
+const STORE_FAVORITES = 'favorites';
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -14,6 +15,9 @@ function openDB() {
       }
       if (!db.objectStoreNames.contains(STORE_OUTBOX)) {
         db.createObjectStore(STORE_OUTBOX, { autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains(STORE_FAVORITES)) {
+        db.createObjectStore(STORE_FAVORITES, { keyPath: 'id' });
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -115,5 +119,67 @@ export async function deleteStory(id) {
     });
   } catch (err) {
     console.error('deleteStory error', err);
+  }
+}
+
+// Favorites functions
+export async function saveFavorite(story) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_FAVORITES, 'readwrite');
+      const store = tx.objectStore(STORE_FAVORITES);
+      const req = store.put(story);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.error('saveFavorite error', err);
+  }
+}
+
+export async function getAllFavorites() {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_FAVORITES, 'readonly');
+      const store = tx.objectStore(STORE_FAVORITES);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.error('getAllFavorites error', err);
+    return [];
+  }
+}
+
+export async function deleteFavorite(id) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_FAVORITES, 'readwrite');
+      const store = tx.objectStore(STORE_FAVORITES);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.error('deleteFavorite error', err);
+  }
+}
+
+export async function clearAllFavorites() {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_FAVORITES, 'readwrite');
+      const store = tx.objectStore(STORE_FAVORITES);
+      const req = store.clear();
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.error('clearAllFavorites error', err);
   }
 }

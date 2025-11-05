@@ -2,6 +2,16 @@ import { saveStories, getAllStories } from '../utils/idb.js';
 
 const API_BASE_URL = 'https://story-api.dicoding.dev/v1';
 
+// Helper function to convert ArrayBuffer to base64
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+
 // // akun dummy (bisa diganti)
 // const DUMMY_USER = {
 //   email: 'user@example.com',
@@ -177,23 +187,32 @@ export async function sendSubscriptionToServer(subscription) {
   try {
     const token = await getToken(); // Get token for authorization
 
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    if (!token) {
+      console.warn('No token available for push subscription');
+      return false;
     }
 
-    const response = await fetch(`${API_BASE_URL}/notifications/subscribe`, { // Corrected URL
+    const subscriptionData = {
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
+        auth: arrayBufferToBase64(subscription.getKey('auth')),
+      },
+    };
+
+    const response = await fetch(`${API_BASE_URL}/notifications/subscribe`, {
       method: 'POST',
-      headers: headers,
-      body: JSON.stringify(subscription), // Send the entire subscription object
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(subscriptionData),
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Failed to send subscription to server:', errorData);
-        return false;
+      const errorData = await response.json();
+      console.error('Failed to send subscription to server:', errorData);
+      return false;
     }
     return response.ok;
   } catch (err) {
@@ -202,28 +221,29 @@ export async function sendSubscriptionToServer(subscription) {
   }
 }
 
-// New function to unsubscribe from server
+// Unsubscribe from server
 export async function unsubscribeFromServer(endpoint) {
   try {
     const token = await getToken(); // Get token for authorization
 
-    const headers = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    if (!token) {
+      console.warn('No token available for push unsubscription');
+      return false;
     }
 
-    const response = await fetch(`${API_BASE_URL}/notifications/subscribe`, { // Corrected URL
+    const response = await fetch(`${API_BASE_URL}/notifications/subscribe`, {
       method: 'DELETE',
-      headers: headers,
-      body: JSON.stringify({ endpoint }), // Send only the endpoint
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ endpoint }),
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Failed to unsubscribe from server:', errorData);
-        return false;
+      const errorData = await response.json();
+      console.error('Failed to unsubscribe from server:', errorData);
+      return false;
     }
     return response.ok;
   } catch (err) {

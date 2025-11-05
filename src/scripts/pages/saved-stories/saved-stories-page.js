@@ -1,4 +1,4 @@
-import { getAllStories, deleteStory } from '../../utils/idb.js';
+import { getAllFavorites, deleteFavorite, clearAllFavorites } from '../../utils/idb.js';
 
 export default class SavedStoriesPage {
   async render() {
@@ -24,7 +24,7 @@ export default class SavedStoriesPage {
 
     const renderSavedStories = async () => {
       try {
-        const savedStories = await getAllStories();
+        const savedStories = await getAllFavorites();
         if (savedStories.length === 0) {
           savedStoriesList.innerHTML = '<p style="text-align: center; color: #6b7280;">Belum ada stories yang disimpan.</p>';
           return;
@@ -73,7 +73,7 @@ export default class SavedStoriesPage {
 
             if (result.isConfirmed) {
               try {
-                await deleteStory(storyId);
+                await deleteFavorite(storyId);
                 Swal.fire({
                   icon: 'success',
                   title: 'Story dihapus',
@@ -83,7 +83,7 @@ export default class SavedStoriesPage {
                 });
                 renderSavedStories(); // Refresh the list
               } catch (err) {
-                console.error('Delete story error', err);
+                console.error('Delete favorite error', err);
                 Swal.fire({
                   icon: 'error',
                   title: 'Gagal menghapus',
@@ -130,10 +130,7 @@ export default class SavedStoriesPage {
 
       if (result.isConfirmed) {
         try {
-          const savedStories = await getAllStories();
-          for (const story of savedStories) {
-            await deleteStory(story.id);
-          }
+          await clearAllFavorites();
           Swal.fire({
             icon: 'success',
             title: 'Semua stories dihapus',
@@ -143,7 +140,7 @@ export default class SavedStoriesPage {
           });
           await renderSavedStories(); // Refresh the list
         } catch (err) {
-          console.error('Clear all stories error', err);
+          console.error('Clear all favorites error', err);
           Swal.fire({
             icon: 'error',
             title: 'Gagal menghapus',
