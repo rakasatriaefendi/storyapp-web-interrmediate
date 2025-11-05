@@ -17,7 +17,7 @@ export default class AddStoryPage {
           <div class="form-group">
             <label for="photo">Foto</label>
             <input type="file" id="photo" name="photo" accept="image/*" required />
-            <img id="photo-preview" style="display:none; width:150px; margin-top:8px; border-radius:8px;">
+            <img id="photo-preview" alt="Pratinjau foto yang dipilih" style="display:none; width:150px; margin-top:8px; border-radius:8px;">
           </div>
 
           <div class="form-group">
@@ -39,7 +39,7 @@ export default class AddStoryPage {
 
           <div class="form-group">
             <label>Kamera Langsung</label>
-            <video id="camera-preview" width="250" autoplay style="display:none; border:1px solid #ccc; border-radius:8px;"></video>
+            <video id="camera-preview" width="250" autoplay style="display:none; border:1px solid #ccc; border-radius:8px;" aria-label="Pratinjau kamera langsung"></video>
             <button type="button" id="start-camera">Aktifkan Kamera</button>
             <button type="button" id="take-photo" style="display:none;">Ambil Foto</button>
           </div>

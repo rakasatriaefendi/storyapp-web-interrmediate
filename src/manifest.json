@@ -29,6 +29,12 @@
       "short_name": "Map",
       "url": "#/map",
       "description": "Buka peta story"
+    },
+    {
+      "name": "Koleksi Favorit",
+      "short_name": "Favorit",
+      "url": "#/saved-stories",
+      "description": "Lihat stories favorit"
     }
   ],
   "screenshots": [

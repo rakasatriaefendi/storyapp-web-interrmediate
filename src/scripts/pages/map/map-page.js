@@ -46,7 +46,7 @@ export default class MapPage {
         const marker = L.marker([story.lat, story.lon]).addTo(map);
         marker.bindPopup(`
           <b>${story.name}</b><br>
-          <img src="${story.photoUrl}" width="150" style="border-radius:8px; margin-top:4px;"><br>
+          <img src="${story.photoUrl}" alt="Foto story oleh ${story.name}" width="150" style="border-radius:8px; margin-top:4px;"><br>
           ${story.description}
         `);
         markers.push({ story, marker });

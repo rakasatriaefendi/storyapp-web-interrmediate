@@ -19,14 +19,15 @@ export default class HomePage {
             </label>
 
             <!-- Tambahan: Search dan Sort -->
-            <input type="text" id="search-input" placeholder="Cari story..." style="margin-left: 10px;" />
+            <label for="search-input" style="margin-left: 10px;">Cari story:</label>
+            <input type="text" id="search-input" placeholder="Cari story..." />S
             <button id="sort-button" data-order="desc">Urutkan: Terbaru ↓</button>
 
-            <!-- IndexedDB Management -->
-            <div class="idb-controls" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
-              <button id="view-cached-stories" style="padding: 8px 12px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">Lihat Stories Tersimpan (IndexedDB)</button>
-              <button id="clear-cached-stories" style="padding: 8px 12px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">Hapus Semua Stories Tersimpan</button>
-            </div>
+          <!-- IndexedDB Management -->
+          <div class="idb-controls" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button id="view-saved-stories" style="padding: 8px 12px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">Lihat Koleksi Favorit</button>
+            <button id="clear-cached-stories" style="padding: 8px 12px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">Hapus Semua Stories Tersimpan</button>
+          </div>
           </div>
 
         <div class="story-section">
@@ -47,7 +48,7 @@ export default class HomePage {
     // tambahan elemen baru
     const searchInput = document.getElementById('search-input');
     const sortButton = document.getElementById('sort-button');
-    const viewCachedBtn = document.getElementById('view-cached-stories');
+    const viewSavedBtn = document.getElementById('view-saved-stories');
     const clearCachedBtn = document.getElementById('clear-cached-stories');
 
     // indikator offline
@@ -88,10 +89,13 @@ export default class HomePage {
 
           return `
             <article class="story-item" tabindex="0" data-lat="${story.lat}" data-lon="${story.lon}">
-              <img src="${story.photoUrl}" alt="${story.name}" loading="lazy" />
+              <img src="${story.photoUrl}" alt="Foto story oleh ${story.name}" loading="lazy" />
               <h3>${story.name}</h3>
               <p>${story.description}</p>
               <small class="story-date">📅 ${createdAt}</small>
+              <button class="save-story-btn" data-id="${story.id}" data-name="${story.name}" data-description="${story.description}" data-photo="${story.photoUrl}" data-created="${story.createdAt}" data-lat="${story.lat}" data-lon="${story.lon}" style="margin-top: 10px; background: #2563eb; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                <i class="fas fa-save"></i> Simpan
+              </button>
             </article>
           `;
         })
@@ -121,7 +125,10 @@ export default class HomePage {
 
       const storyItems = document.querySelectorAll('.story-item');
       storyItems.forEach((item) => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (e) => {
+          // Prevent click if save button was clicked
+          if (e.target.classList.contains('save-story-btn') || e.target.closest('.save-story-btn')) return;
+
           const lat = parseFloat(item.dataset.lat);
           const lon = parseFloat(item.dataset.lon);
 
@@ -133,6 +140,45 @@ export default class HomePage {
 
           storyItems.forEach((el) => el.classList.remove('active'));
           item.classList.add('active');
+        });
+      });
+
+      // Save story buttons
+      const saveButtons = document.querySelectorAll('.save-story-btn');
+      saveButtons.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const storyData = {
+            id: btn.dataset.id,
+            name: btn.dataset.name,
+            description: btn.dataset.description,
+            photoUrl: btn.dataset.photo,
+            createdAt: btn.dataset.created,
+            lat: btn.dataset.lat ? parseFloat(btn.dataset.lat) : null,
+            lon: btn.dataset.lon ? parseFloat(btn.dataset.lon) : null,
+          };
+
+          try {
+            await saveStories([storyData]);
+            Swal.fire({
+              icon: 'success',
+              title: 'Story disimpan!',
+              text: 'Story telah disimpan ke koleksi favorit.',
+              timer: 2000,
+              showConfirmButton: false,
+            });
+            btn.textContent = 'Tersimpan';
+            btn.disabled = true;
+            btn.style.background = '#10b981';
+          } catch (err) {
+            console.error('Save story error', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Gagal menyimpan',
+              text: err.message,
+              confirmButtonColor: '#dc2626',
+            });
+          }
         });
       });
     };
@@ -183,53 +229,9 @@ export default class HomePage {
       renderMapAndList(allStories);
     });
 
-    // IndexedDB: View cached stories
-    viewCachedBtn.addEventListener('click', async () => {
-      const cachedStories = await getAllStories();
-      if (cachedStories.length === 0) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Tidak ada stories tersimpan',
-          text: 'Belum ada stories yang disimpan di IndexedDB.',
-        });
-        return;
-      }
-
-      // Render cached stories with delete buttons
-      const cachedHtml = cachedStories.map((story) => `
-        <article class="story-item" data-id="${story.id}">
-          <img src="${story.photoUrl}" alt="${story.name}" loading="lazy" />
-          <h3>${story.name}</h3>
-          <p>${story.description}</p>
-          <small class="story-date">📅 ${new Date(story.createdAt).toLocaleString('id-ID')}</small>
-          <button class="delete-story-btn" data-id="${story.id}" style="margin-top: 10px; background: #dc2626; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">Hapus</button>
-        </article>
-      `).join('');
-
-      Swal.fire({
-        title: 'Stories Tersimpan di IndexedDB',
-        html: `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; max-height: 400px; overflow-y: auto;">${cachedHtml}</div>`,
-        showConfirmButton: false,
-        showCloseButton: true,
-        width: '90%',
-        didOpen: () => {
-          // Add delete event listeners
-          document.querySelectorAll('.delete-story-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-              const storyId = e.target.dataset.id;
-              await deleteStory(storyId);
-              Swal.fire({
-                icon: 'success',
-                title: 'Story dihapus',
-                text: 'Story telah dihapus dari IndexedDB.',
-                timer: 1500,
-              });
-              // Refresh the modal content
-              e.target.closest('.story-item').remove();
-            });
-          });
-        }
-      });
+    // view saved stories button - navigate to saved stories page
+    viewSavedBtn.addEventListener('click', () => {
+      window.location.hash = '#/saved-stories';
     });
 
     // IndexedDB: Clear all cached stories
