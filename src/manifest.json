@@ -10,11 +10,6 @@
       "src": "./favicon.png",
       "sizes": "any",
       "type": "image/png"
-    },
-    {
-      "src": "./images/logo.png",
-      "sizes": "any",
-      "type": "image/png"
     }
   ],
   "shortcuts": [
@@ -37,11 +32,5 @@
       "description": "Lihat stories favorit"
     }
   ],
-  "screenshots": [
-    {
-      "src": "./images/sample-screenshot.png",
-      "sizes": "540x720",
-      "type": "image/png"
-    }
-  ]
+  "screenshots": []
 }
