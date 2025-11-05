@@ -11,9 +11,9 @@ Proyek ini dibuat sebagai submission untuk kursus **Belajar Pengembangan Web Int
 - ✅ **Data dan Marker di Peta**: Tampilan cerita di peta Leaflet dengan marker interaktif.
 - ✅ **Fitur Tambah Data Baru**: Form upload cerita dengan foto, deskripsi, dan lokasi.
 - ✅ **Aksesibilitas**: Skip links, ARIA labels, dan navigasi keyboard.
-- ✅ **Push Notification**: Notifikasi dinamis dengan toggle enable/disable dan action navigasi.
+- ✅ **Push Notification**: Notifikasi dinamis dengan toggle enable/disable, action navigasi, dan VAPID key sesuai dokumentasi API.
 - ✅ **PWA dengan Instalasi dan Offline**: Installable, caching, dan offline mode dengan data dinamis.
-- ✅ **IndexedDB**: CRUD untuk cerita dan outbox, dengan filter, search, sort, dan sync offline-online.
+- ✅ **IndexedDB**: CRUD untuk cerita dan outbox, dengan filter, search, sort, dan sync offline-online. Halaman Favorit untuk menyimpan dan mengelola cerita favorit.
 
 ### Fitur Tambahan
 - **Autentikasi**: Login dan register menggunakan API Dicoding.
@@ -98,8 +98,10 @@ src/
 │   │   │   └── add-story-page.js
 │   │   ├── login/
 │   │   │   └── login-page.js
-│   │   └── register/
-│   │       └── register-page.js
+│   │   ├── register/
+│   │   │   └── register-page.js
+│   │   └── saved-stories/
+│   │       └── saved-stories-page.js
 │   ├── routes/             # Routing logic
 │   │   ├── routes.js
 │   │   └── url-parser.js
